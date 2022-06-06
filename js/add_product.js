@@ -47,14 +47,14 @@ window.addEventListener('load', function () {
                                         window.cart = ui.components.cart[0]
                                    
                                          freeItem(window.cart)
-                                        updateFreeItemToCart(window.cart.lineItemCache)
+                                      //  updateFreeItemToCart(window.cart.lineItemCache)
                                     }, 200);
 
 
                                     setTimeout(function () {
                                         window.cart = ui.components.cart[0]
                                         freeItem(window.cart)
-                                        updateFreeItemToCart(window.cart.lineItemCache)
+                                      //  updateFreeItemToCart(window.cart.lineItemCache)
                                     }, 1000);
 
 
@@ -141,7 +141,7 @@ window.addEventListener('load', function () {
 
                                         //  console.log(ui.components.cart[0])
                                      //   updateFreeItemToCart(cart.lineItemCache)
-                                        //     freeItem(ui.components.cart[0])
+                                             freeItem(ui.components.cart[0])
                                     }, 1000);
                                 },
 
@@ -509,77 +509,119 @@ window.addEventListener('load', function () {
 
     })();
 
+    function count_quanties(index, lineItems) {
+        let quanties = 0
+        for (i = 0; i < lineItems.length; i++) {
+            if (index != i) {
+
+                quanties = quanties + lineItems[i].quantity
+             
+            }
+            window.quanties = quanties
+            return quanties
+    }
+}
     function freeItem(mycart) {
-        let cart = window.cart;
 
+    
+        let index = getIndex(script_vars.second_product_title, mycart.lineItemCache)
+        console.log('index' + index)
+        console.log('products' + mycart.lineItemCache.length)
+        console.log( count_quanties(index, mycart.lineItemCache)) 
+        if (index == -1 && mycart.lineItemCache.length >= 1) {
+            addFreeItemToCart();
+          //  calc_quanties(mycart.lineItemCache)
+            mycart.init()
+            { return; }
+        }
+        else if ((index == 0) && mycart.lineItemCache.length == 1) {
+           
+            let pfand_quantity = document.getElementsByName('frame-cart')[0].contentWindow.document.getElementById(mycart.lineItemCache[index].id).getElementsByClassName('shopify-buy__quantity shopify-buy__cart-item__quantity-input')[0]
+            console.log('only pfand')
+            pfand_quantity.value = 0
+            pfand_decre = document.getElementsByName('frame-cart')[0].contentWindow.document.getElementById(mycart.lineItemCache[index].id).getElementsByClassName('shopify-buy__btn--seamless shopify-buy__quantity-decrement')[0]
+            /*shopify-buy__btn--seamless shopify-buy__quantity-decrement */
+            //   console.log(pfand)
+            //   let pfand = mycart.lineItemCache[index].quantity
 
-        window.freeItemInCart = false;
+           // pfand_decre.click()
+            console.log(pfand_decre)
+         
+            return;
+          
+        }
+        else if ((index > -0) && mycart.lineItemCache.length >= 1) { 
+            let pfand_quantity = document.getElementsByName('frame-cart')[0].contentWindow.document.getElementById(mycart.lineItemCache[index].id).getElementsByClassName('shopify-buy__quantity shopify-buy__cart-item__quantity-input')[0]
+      
+            
+            console.log(getMethods(mycart))
+            console.log(mycart.lineItemCache[index])
+      
+            mycart.updateCacheItem(mycart.lineItemCache[index].id, window.quanties * 12)
+        //    mycart.updateItem(   product,window.quanties * 12 )
+          //  mycart._userEvent()
+            console.log(mycart.lineItemCache[index].quantity)
+           // pfand_decre = document.getElementsByName('frame-cart')[0].contentWindow.document.getElementById(mycart.lineItemCache[index].id).getElementsByClassName('shopify-buy__btn--seamless shopify-buy__quantity-decrement')[0]
+          //  
+            return;
+          
+        }
+       
+
+    //    window.freeItemInCart = false;
         //  console.log(mycart);
+     /*
         for (i = 0; i < mycart.lineItemCache.length; i++) {
 
             if (mycart.lineItemCache[i].title == script_vars.second_product_title && mycart.lineItemCache.length == 1) {
-                removeFreeItem(mycart.lineItemCache[i].id);
+               // removeFreeItem(mycart.lineItemCache[i].id);
                 { break; }
             }
             else if (mycart.lineItemCache[i].title == script_vars.second_product_title) {
                 window.freeItemInCart = true;
                 //    alwaysqty(mycart.lineItemCache[i].id);
-                addFreeItemToCart();
+              //  addFreeItemToCart();
                 { break; }
             }
             else if (i == mycart.lineItemCache.length - 1 && freeItemInCart == false) {
 
                 //  console.log(mycart.lineItemCache)
                 //  console.log('test');
-                addFreeItemToCart();
+               // addFreeItemToCart();
+                
                 window.freeItemInCart = true;
                 console.log("PUT");
 
                 { break; }
             }
         }
-
+*/
     }
 
-    function removeFreeItem(id) {
-        console.log(id)
-        document.getElementsByName('frame-cart')[0].contentWindow.document.getElementById(id).querySelectorAll("[data-element='lineItem.quantityDecrement']")[0].click();
-        document.getElementsByName('frame-cart')[0].contentWindow.document.querySelectorAll("[data-element='cart.close']")[0].click()
-    }
+    const getMethods = (obj) => {
+        let properties = new Set()
+        let currentObj = obj
+        do {
+          Object.getOwnPropertyNames(currentObj).map(item => properties.add(item))
+        } while ((currentObj = Object.getPrototypeOf(currentObj)))
+        return [...properties.keys()].filter(item => typeof obj[item] === 'function')
+      }
 
-    function alwaysqty(id) {
-        console.log(id)
-        setInterval(function () {
-            if (document.getElementsByName('frame-cart')[0].contentWindow.document.getElementById(id) != null) {
-                document.getElementsByName('frame-cart')[0].contentWindow.document.getElementById(id).querySelectorAll("[data-element='lineItem.quantity']")[0].style.display = "none";
-            }
-        }, 100);
-
-    }
-
-    function updateFreeItemToCart(cart) {
-  
-        
-       
-         //   calc_quanties(cart)
-            
+    function getIndex(product_title, array) {
+        var index = array.findIndex(function (item) {
+            return item.title == product_title
+        });
+        return index
+}
 
 
-
-            
-       
-    }
-
+    function change_quantity(id, quantity) {
+     
+ }
 
     function addFreeItemToCart() {
-      
-console.log('add product')
-        //    document.getElementsByName('frame-product-' + script_vars.second_product_id)[0].contentWindow.document.getElementsByClassName('shopify-buy__btn  shopify-buy__beside-quantity')[0].click();
-
-
-
-            window.freeItemInCart = true;
-      
+            document.getElementsByName('frame-product-' + script_vars.second_product_id)[0].contentWindow.document.getElementsByClassName('shopify-buy__btn  shopify-buy__beside-quantity')[0].click();
+   
     }
 
 })
