@@ -1,4 +1,4 @@
-window.addEventListener('load', function () {
+window.addEventListener('DOMContentLoaded', function () {
 
 
     (function () {
@@ -60,14 +60,9 @@ window.addEventListener('load', function () {
 
 
                                 addVariantToCart: function (product) {
-                                    console.log(window.cart)
-                                    console.log(ui.components.cart[0])
-                                  //  hideInfo()
-                          
-                                    //     hideInfo(ui.components.cart[0])
-
-
-
+                                    // console.log( 'product: addVariant (js)')
+                                    // console.log(window.cart)
+                                    // console.log(ui.components.cart[0])
                                 },
 
                             },
@@ -99,55 +94,82 @@ function count_quanties(index, lineItems) {
     let quanties = 0
     for (i = 0; i < lineItems.length; i++) {
         if (index != i) {
-
             quanties = quanties + lineItems[i].quantity
-
         }
-
-
     }
     return quanties
 }
 
+const customUpdateItem = async ( cart, index, qnt ) => {
+    console.log( 'customUpdateItem', qnt );
+    const test = await cart.updateItem( cart.lineItemCache[index].id, qnt );
+}
+
+const customUpdatePfandItem = ( cart, multi ) => {
+    let newQnt = 0;
+    let counter = 1;
+    
+    cart.lineItemCache.map(x => {
+        // ignore last item (its pfand)
+        if( counter < cart.lineItemCache.length ) {
+            newQnt = newQnt+x.quantity;
+        }
+        counter++;
+    });
+
+    // const growth = qnt ? qnt*multi : 0;  
+    const growth = newQnt ? newQnt*multi : 0;  
+    const index = cart.lineItemCache.length-1; 
+    if( index && index > 0 ) {
+        cart.updateItem( cart.lineItemCache[index].id, growth );
+    } else {
+        cart.updateItem( cart.lineItemCache[index].id, 0 );
+    }
+    // console.log( 'customUpdatePfandItem' );
+}
+
+const addPfandItem = async ( cart, product_id, product_title, count ) => {
+    const index = await getIndex( product_title, cart.lineItemCache );
+
+    if ( index == -1 && cart.lineItemCache.length === 1 ) {
+        // console.log('addPfand: add pfand item')
+        await addFreeItemToCart( product_id, count );       
+    }
+}
 
 
-function freeItem(mycart, product_title, count, product_id) {
 
-
-    let index = getIndex(product_title, mycart.lineItemCache)
-    console.log(getMethods(mycart))
+function freeItem( mycart, product_title, count, product_id ) {
+    let index = getIndex( product_title, mycart.lineItemCache );
+    console.log('freeItem', index, mycart.lineItemCache.length )
 
     if (index == -1 && mycart.lineItemCache.length >= 1) {
-
-        addFreeItemToCart(product_id, count)
-       
-      
-   
-
-        { return; }
-    }
-    else if ((index == 0) && mycart.lineItemCache.length == 1) {
-
+        console.log('add free item to cart')
+        addFreeItemToCart( product_id, count );
+        const qnt = count_quanties( index, mycart.lineItemCache );
+        
+        // return;
+    } else if ( index === 0 && mycart.lineItemCache.length === 1 ) {
         mycart.empty()
         mycart.close()
 
+        // return;
+    } else if ( index >= 0 && mycart.lineItemCache.length > 1 ) {
+        const qnt = count_quanties( index, mycart.lineItemCache );
+        /* if (window.Update == true) {
+            mycart.updateItem(mycart.lineItemCache[index].id, quanties * count)         
+            window.Update = false
+        } */
+        mycart.updateItem( mycart.lineItemCache[index].id, qnt * count );
+        mycart.updateCacheItem( mycart.lineItemCache[index].id, qnt * count );
+        mycart.updateCache( mycart.lineItemCache );
 
-
+        // return;
+    } else {
+        // return;
     }
-    else if ((index >= 0) && mycart.lineItemCache.length > 1) {
-        let quanties = count_quanties(index, mycart.lineItemCache)
 
-
-        mycart.updateCacheItem(mycart.lineItemCache[index].id, quanties * count)
-  
-        mycart.updateCache(mycart.lineItemCache)
-
-       
-        
-        { return; }
-
-    }
-
+    return true;
 }
 
 function displayOut(id) {
@@ -157,11 +179,6 @@ function displayOut(id) {
         }
     }, 100);
 }
-
-
-
-
-
 
 function hideInfo(cart) {
     index = getIndex(script_vars.second_product_title, cart.lineItemCache)
@@ -199,19 +216,24 @@ function getIndex(product_title, array) {
     });
     return index
 }
+
 function getID(product_title, array) {
     console.log(array[getIndex(product_title, array)])
     return array[getIndex(product_title, array)].id
 
 }
 
-function addFreeItemToCart(second_product_id, count) {
+/* function addFreeItemToCart( second_product_id, count ) {
+    
+} */
 
-
+const addFreeItemToCart = async ( second_product_id, count ) => {
     document.getElementById('product-component-'+second_product_id). querySelectorAll('.shopify-buy__quantity')[0].value = count;
-    document.getElementById('product-component-'+second_product_id).querySelectorAll('.shopify-buy__btn')[0].click()
+    const update = await document.getElementById('product-component-'+second_product_id).querySelectorAll('.shopify-buy__btn')[0].click();
 
-
+    return new Promise( ( res, rej ) => {
+        res( update );
+    })
 }
 
 
